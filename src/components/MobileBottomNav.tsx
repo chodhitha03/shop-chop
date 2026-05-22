@@ -15,7 +15,7 @@ const MobileBottomNav = () => {
     { path: '/breakfast', label: 'Recipes', icon: UtensilsCrossed },
     { path: '/supermarket', label: 'Shop', icon: Store },
     { path: '/cart', label: 'Cart', icon: ShoppingCart, badge: totalItems },
-    { path: user ? '/my-orders' : '/sign-in', label: user ? 'Orders' : 'Login', icon: user ? User : LogIn },
+    { path: user ? '/account' : '/sign-in', label: user ? 'Account' : 'Login', icon: user ? User : LogIn },
   ];
 
   const isActive = (path: string) => {

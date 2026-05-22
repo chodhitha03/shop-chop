@@ -53,6 +53,12 @@ const AuthButton = () => {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <Link to="/account">
+          <DropdownMenuItem className="cursor-pointer">
+            <User className="mr-2 h-4 w-4" />
+            <span>My Account</span>
+          </DropdownMenuItem>
+        </Link>
         <Link to="/my-orders">
           <DropdownMenuItem className="cursor-pointer">
             <Package className="mr-2 h-4 w-4" />
