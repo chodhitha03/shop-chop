@@ -6,25 +6,28 @@ const PUBLIC_KEY = "thDcpU67UfvdC_KEk";
 
 const TEMPLATES = {
   ORDER_CONFIRMATION: "template_zoam22i",
-  RESET_PASSWORD: "template_lqhhh6d",
+  RESET_PASSWORD: "template_qtyum9o",
 };
 
 /* ─── Initialize EmailJS ──────────────────────────── */
 emailjs.init(PUBLIC_KEY);
 
 /* ─── Helper: build order items HTML rows ─────────── */
+const formatCurrency = (value: number) => `₹${Number(value || 0).toFixed(2)}`;
+
 function buildOrderItemsHtml(
   items: { name: string; quantity: number; price: number }[]
 ): string {
   return items
-    .map(
-      (item) => `
+    .map((item) => {
+      const price = Number(item.price || 0);
+      return `
     <tr style="border-bottom:1px solid #E8E0D4;">
       <td style="padding:12px 0;font-size:14px;color:#1E293B;"><strong>${item.name}</strong></td>
       <td style="padding:12px 0;font-size:14px;color:#64748B;text-align:center;">${item.quantity}</td>
-      <td style="padding:12px 0;font-size:14px;color:#1E293B;text-align:right;font-weight:600;">₹${item.price}</td>
-    </tr>`
-    )
+      <td style="padding:12px 0;font-size:14px;color:#1E293B;text-align:right;font-weight:600;">${formatCurrency(price)}</td>
+    </tr>`;
+    })
     .join("");
 }
 
@@ -45,6 +48,14 @@ export async function sendOrderConfirmation(data: {
   discount: number;
   total: number;
 }) {
+  const subtotalValue = Number(data.subtotal || 0);
+  const discountValue = Number(data.discount || 0);
+  const deliveryFeeValue = typeof data.deliveryFee === "string" ? null : Number(data.deliveryFee || 0);
+  const computedTotal =
+    Number.isFinite(Number(data.total))
+      ? Number(data.total)
+      : Math.max(subtotalValue + (deliveryFeeValue || 0) - discountValue, 0);
+
   const params = {
     to_email: data.toEmail,
     customer_name: data.customerName,
@@ -54,15 +65,23 @@ export async function sendOrderConfirmation(data: {
     estimated_delivery: data.estimatedDelivery,
     delivery_address: data.deliveryAddress,
     order_items: buildOrderItemsHtml(data.items),
-    subtotal: data.subtotal.toFixed(2),
+    subtotal: subtotalValue.toFixed(2),
+    subtotal_amount: subtotalValue.toFixed(2),
+    subtotal_display: formatCurrency(subtotalValue),
     delivery_fee:
       typeof data.deliveryFee === "string"
         ? data.deliveryFee
-        : data.deliveryFee > 0
-        ? `₹${data.deliveryFee.toFixed(2)}`
+        : deliveryFeeValue && deliveryFeeValue > 0
+        ? formatCurrency(deliveryFeeValue)
         : "FREE",
-    discount: data.discount.toFixed(2),
-    total: data.total.toFixed(2),
+    delivery_fee_amount: deliveryFeeValue ? deliveryFeeValue.toFixed(2) : "0.00",
+    delivery_fee_display: typeof data.deliveryFee === "string" ? data.deliveryFee : formatCurrency(deliveryFeeValue || 0),
+    discount: discountValue.toFixed(2),
+    discount_amount: discountValue.toFixed(2),
+    discount_display: formatCurrency(discountValue),
+    total: computedTotal.toFixed(2),
+    total_amount: computedTotal.toFixed(2),
+    total_display: formatCurrency(computedTotal),
     track_order_url: window.location.origin + "/",
   };
 

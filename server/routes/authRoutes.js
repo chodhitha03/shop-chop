@@ -73,6 +73,10 @@ router.post("/login", async (req, res) => {
 
     const user = await User.findOne({ email });
 
+    if (user && user.isBlocked) {
+      return res.status(403).json({ message: "Account is blocked" });
+    }
+
     if (user && (await user.comparePassword(password))) {
       const token = generateToken(res, user._id);
       res.json({

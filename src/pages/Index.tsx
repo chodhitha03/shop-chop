@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,16 +7,35 @@ import {
   Coffee, Sun, Moon, Cookie, Store, ChefHat,
   ShoppingBag, Clock, Users, ArrowRight, Sparkles
 } from 'lucide-react';
-import { recipes } from '@/data/recipes';
+import { recipes, type Recipe } from '@/data/recipes';
 import heroImage from '@/assets/modern-hero-image.jpg';
 import {
   PageTransition, FadeUp, StaggerChildren, StaggerItem,
   HoverLift, motion
 } from '@/components/motion';
+import { api } from '@/lib/api';
 
 const Index = () => {
-  const featuredRecipes = recipes.slice(0, 4);
-  const heroRecipe = recipes[0];
+  const [recipeList, setRecipeList] = useState<Recipe[]>(recipes);
+
+  useEffect(() => {
+    fetchRecipes();
+  }, []);
+
+  const fetchRecipes = async () => {
+    try {
+      const res = await fetch(api('/api/recipes'));
+      if (res.ok) {
+        const data = await res.json();
+        setRecipeList(data);
+      }
+    } catch (error) {
+      console.error('Fetch recipes error:', error);
+    }
+  };
+
+  const featuredRecipes = recipeList.slice(0, 4);
+  const heroRecipe = recipeList[0] || recipes[0];
 
   const categories = [
     { name: 'Breakfast', path: '/breakfast', icon: Coffee, tone: 'bg-amber-100/80 text-amber-900', description: 'Bright starts for the week' },
@@ -109,7 +129,7 @@ const Index = () => {
                         <p className="text-sm text-muted-foreground">{heroRecipe.description}</p>
                       </div>
                       <Button variant="subtle" size="sm" asChild>
-                        <Link to={`/recipe/${heroRecipe.id}`}>View</Link>
+                        <Link to={`/recipe/${(heroRecipe as Recipe & { slug?: string }).slug || heroRecipe.id}`}>View</Link>
                       </Button>
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2">
@@ -225,8 +245,10 @@ const Index = () => {
               </div>
             </FadeUp>
             <StaggerChildren className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {featuredRecipes.map((recipe) => (
-                <StaggerItem key={recipe.id}>
+              {featuredRecipes.map((recipe) => {
+                const recipeKey = (recipe as Recipe & { slug?: string }).slug || recipe.id;
+                return (
+                <StaggerItem key={recipeKey}>
                   <HoverLift>
                     <Card className="group overflow-hidden bg-panel">
                       <div className="aspect-[4/3] overflow-hidden">
@@ -246,13 +268,14 @@ const Index = () => {
                           <span className="flex items-center gap-2"><Users className="h-4 w-4" />{recipe.servings} servings</span>
                         </div>
                         <Button size="sm" variant="outline" asChild className="w-full">
-                          <Link to={`/recipe/${recipe.id}`}>View recipe</Link>
+                          <Link to={`/recipe/${recipeKey}`}>View recipe</Link>
                         </Button>
                       </CardContent>
                     </Card>
                   </HoverLift>
                 </StaggerItem>
-              ))}
+                );
+              })}
             </StaggerChildren>
           </div>
         </section>

@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { type LucideIcon, Clock, Users, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { getRecipesByCategory } from '@/data/recipes';
+import { getRecipesByCategory, type Recipe } from '@/data/recipes';
 import {
   PageTransition, FadeUp, StaggerChildren, StaggerItem,
   HoverLift, motion
 } from '@/components/motion';
+import { api } from '@/lib/api';
 
 type RecipeCategory = 'breakfast' | 'lunch' | 'dinner' | 'desserts';
 
@@ -31,7 +32,23 @@ const RecipeCategoryPage = ({
   eyebrow,
 }: RecipeCategoryPageProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const recipes = getRecipesByCategory(category);
+  const [recipes, setRecipes] = useState<Recipe[]>(getRecipesByCategory(category));
+
+  useEffect(() => {
+    fetchRecipes();
+  }, [category]);
+
+  const fetchRecipes = async () => {
+    try {
+      const res = await fetch(api(`/api/recipes?category=${category}`));
+      if (res.ok) {
+        const data = await res.json();
+        setRecipes(data);
+      }
+    } catch (error) {
+      console.error('Fetch recipes error:', error);
+    }
+  };
 
   const filteredRecipes = recipes.filter((recipe) =>
     recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -76,8 +93,10 @@ const RecipeCategoryPage = ({
             </FadeUp>
 
             <StaggerChildren className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredRecipes.map((recipe) => (
-                <StaggerItem key={recipe.id}>
+              {filteredRecipes.map((recipe) => {
+                const recipeKey = (recipe as Recipe & { slug?: string }).slug || recipe.id;
+                return (
+                <StaggerItem key={recipeKey}>
                   <HoverLift>
                     <Card className="group overflow-hidden bg-panel">
                       <div className="aspect-[4/3] overflow-hidden">
@@ -112,13 +131,14 @@ const RecipeCategoryPage = ({
                           </span>
                         </div>
                         <Button variant="outline" size="sm" asChild className="w-full">
-                          <Link to={`/recipe/${recipe.id}`}>View recipe</Link>
+                          <Link to={`/recipe/${recipeKey}`}>View recipe</Link>
                         </Button>
                       </CardContent>
                     </Card>
                   </HoverLift>
                 </StaggerItem>
-              ))}
+                );
+              })}
             </StaggerChildren>
 
             {filteredRecipes.length === 0 && (

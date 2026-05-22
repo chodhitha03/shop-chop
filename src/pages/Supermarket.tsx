@@ -1,33 +1,52 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Store, Search, Plus, Check } from 'lucide-react';
-import { supermarketProducts, categories } from '@/data/supermarket';
+import { supermarketProducts, categories, type SupermarketProduct } from '@/data/supermarket';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import {
   PageTransition, FadeUp, StaggerChildren, StaggerItem,
   HoverLift, motion, AnimatePresence
 } from '@/components/motion';
+import { api } from '@/lib/api';
 
 const Supermarket = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
+  const [products, setProducts] = useState<SupermarketProduct[]>(supermarketProducts);
   const { addItem } = useCart();
 
-  const filteredProducts = supermarketProducts.filter(product => {
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch(api('/api/products'));
+      if (res.ok) {
+        const data = await res.json();
+        setProducts(data);
+      }
+    } catch (error) {
+      console.error('Fetch products error:', error);
+    }
+  };
+
+  const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: SupermarketProduct & { slug?: string }) => {
+    const productKey = product.slug || product.id;
     addItem({
-      id: product.id,
+      id: productKey,
       name: product.name,
       price: product.price,
       image: product.image,
@@ -35,11 +54,11 @@ const Supermarket = () => {
     });
 
     // Flash the checkmark
-    setAddedIds(prev => new Set(prev).add(product.id));
+    setAddedIds(prev => new Set(prev).add(productKey));
     setTimeout(() => {
       setAddedIds(prev => {
         const next = new Set(prev);
-        next.delete(product.id);
+        next.delete(productKey);
         return next;
       });
     }, 1200);
@@ -112,8 +131,10 @@ const Supermarket = () => {
 
             {/* Product grid */}
             <StaggerChildren className="mt-8 sm:mt-10 grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-              {filteredProducts.map((product) => (
-                <StaggerItem key={product.id}>
+              {filteredProducts.map((product) => {
+                const productKey = (product as SupermarketProduct & { slug?: string }).slug || product.id;
+                return (
+                <StaggerItem key={productKey}>
                   <HoverLift>
                     <Card className="group overflow-hidden bg-card/90 h-full flex flex-col">
                       <div className="relative aspect-square overflow-hidden">
@@ -159,7 +180,7 @@ const Supermarket = () => {
                             disabled={product.stock === 0}
                           >
                             <AnimatePresence mode="wait">
-                              {addedIds.has(product.id) ? (
+                              {addedIds.has(productKey) ? (
                                 <motion.span
                                   key="added"
                                   initial={{ scale: 0 }}
@@ -188,7 +209,8 @@ const Supermarket = () => {
                     </Card>
                   </HoverLift>
                 </StaggerItem>
-              ))}
+                );
+              })}
             </StaggerChildren>
 
             {filteredProducts.length === 0 && (

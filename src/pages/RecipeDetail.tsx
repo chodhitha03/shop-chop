@@ -8,10 +8,11 @@ import {
   CheckCircle2, Circle, Minus, Play, Pause, RotateCcw,
   Store, Sparkles, Flame, Zap, Leaf, TrendingUp, Check
 } from 'lucide-react';
-import { getRecipeById, recipes } from '@/data/recipes';
+import { getRecipeById, recipes, type Recipe } from '@/data/recipes';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import { PageTransition, motion, FadeUp } from '@/components/motion';
+import { api } from '@/lib/api';
 
 /* ─── helpers ─────────────────────────────────────── */
 const DIFF_MAP: Record<string, { label: string; color: string }> = {
@@ -55,6 +56,8 @@ const RecipeDetail = () => {
   const { addItem } = useCart();
 
   const [loading, setLoading]         = useState(true);
+  const [recipe, setRecipe]           = useState<Recipe | null>(null);
+  const [related, setRelated]         = useState<Recipe[]>([]);
   const [liked, setLiked]             = useState(false);
   const [saved, setSaved]             = useState(false);
   const [rating, setRating]           = useState(0);
@@ -68,12 +71,51 @@ const RecipeDetail = () => {
   const [addedAll, setAddedAll]       = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const recipe = id ? getRecipeById(id) : null;
+  useEffect(() => {
+    const fetchRecipe = async () => {
+      if (!id) return;
+      setLoading(true);
+      try {
+        const res = await fetch(api(`/api/recipes/${id}`));
+        if (res.ok) {
+          const data = await res.json();
+          setRecipe(data);
+        } else {
+          setRecipe(getRecipeById(id) || null);
+        }
+      } catch (error) {
+        console.error('Fetch recipe error:', error);
+        setRecipe(getRecipeById(id) || null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecipe();
+  }, [id]);
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 600);
-    return () => clearTimeout(t);
-  }, []);
+    const fetchRelated = async () => {
+      if (!recipe) return;
+      try {
+        const res = await fetch(api(`/api/recipes?category=${recipe.category}`));
+        if (res.ok) {
+          const data = await res.json();
+          const filtered = data.filter((item: Recipe) => item.slug !== recipe.slug);
+          setRelated(filtered.slice(0, 3));
+          return;
+        }
+      } catch (error) {
+        console.error('Fetch related recipes error:', error);
+      }
+
+      const recipeKey = (recipe as Recipe & { slug?: string }).slug || recipe.id;
+      const fallback = recipes.filter(r => r.category === recipe.category && r.id !== recipeKey).slice(0, 3);
+      setRelated(fallback as Recipe[]);
+    };
+
+    fetchRelated();
+  }, [recipe]);
 
   useEffect(() => {
     if (recipe) setServings(recipe.servings);
@@ -101,11 +143,11 @@ const RecipeDetail = () => {
     </div>
   );
 
+  const recipeKey  = (recipe as Recipe & { slug?: string }).slug || recipe.id;
   const diff       = DIFF_MAP[recipe.category] ?? { label: 'Medium', color: 'text-amber-400' };
-  const nutrition  = NUTRITION[recipe.id];
+  const nutrition  = NUTRITION[recipeKey];
   const ratio      = servings / recipe.servings;
   const totalCost  = recipe.ingredients.reduce((s, i) => s + i.price, 0);
-  const related    = recipes.filter(r => r.category === recipe.category && r.id !== recipe.id).slice(0, 3);
 
   const toggleStep = (i: number) => {
     setCompleted(prev => {
@@ -116,13 +158,13 @@ const RecipeDetail = () => {
   };
 
   const addIngredient = (ing: typeof recipe.ingredients[0]) => {
-    addItem({ id: `${recipe.id}-${ing.name}`, name: ing.name, price: ing.price, type: 'recipe', recipeId: recipe.id });
+    addItem({ id: `${recipeKey}-${ing.name}`, name: ing.name, price: ing.price, type: 'recipe', recipeId: recipeKey });
     toast.success(`${ing.name} added to cart`);
   };
 
   const addAll = () => {
     recipe.ingredients.forEach(ing =>
-      addItem({ id: `${recipe.id}-${ing.name}`, name: ing.name, price: ing.price, type: 'recipe', recipeId: recipe.id })
+      addItem({ id: `${recipeKey}-${ing.name}`, name: ing.name, price: ing.price, type: 'recipe', recipeId: recipeKey })
     );
     setAddedAll(true);
     toast.success(`All ${recipe.ingredients.length} ingredients added!`);
@@ -401,8 +443,10 @@ const RecipeDetail = () => {
               <div>
                 <h2 className="text-lg font-bold mb-4">More {recipe.category.charAt(0).toUpperCase() + recipe.category.slice(1)} Recipes</h2>
                 <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-                  {related.map(r => (
-                    <Link key={r.id} to={`/recipe/${r.id}`} className="group rounded-2xl border bg-card overflow-hidden transition hover:shadow-lg hover:-translate-y-1">
+                  {related.map(r => {
+                    const relatedKey = (r as Recipe & { slug?: string }).slug || r.id;
+                    return (
+                      <Link key={relatedKey} to={`/recipe/${relatedKey}`} className="group rounded-2xl border bg-card overflow-hidden transition hover:shadow-lg hover:-translate-y-1">
                       <div className="h-36 overflow-hidden">
                         <img src={r.image} alt={r.name} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                       </div>
@@ -412,8 +456,9 @@ const RecipeDetail = () => {
                           <Clock className="h-3 w-3" />{r.cookingTime} min
                         </p>
                       </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             )}

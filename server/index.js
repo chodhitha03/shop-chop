@@ -5,6 +5,12 @@ import { connectDb } from "./db.js";
 import config from "./config.js";
 import authRoutes from "./routes/authRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import couponRoutes from "./routes/couponRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
+import recipeRoutes from "./routes/recipeRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import { seedDataIfEmpty } from "./utils/seedData.js";
 
 const app = express();
 
@@ -36,6 +42,11 @@ app.use(
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/coupons", couponRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/recipes", recipeRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
@@ -51,6 +62,8 @@ const startServer = async () => {
   try {
     await connectDb();
     console.log("MongoDB Connected");
+
+    await seedDataIfEmpty();
 
     app.listen(config.port, () => {
       console.log(`Server running in ${config.nodeEnv} mode on port ${config.port}`);

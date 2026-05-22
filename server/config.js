@@ -8,7 +8,11 @@ const config = {
   mongoUri: process.env.MONGODB_URI,
   mongoDb: process.env.MONGODB_DB || "shopchop",
   jwtSecret: process.env.JWT_SECRET,
-  clientOrigin: process.env.CLIENT_ORIGIN || "http://localhost:8080"
+  clientOrigin: process.env.CLIENT_ORIGIN || "http://localhost:8080",
+  adminEmails: [
+    "maripellichodhitha@gmail.com",
+    "chitikeshimahesh6@gmail.com",
+  ].map((email) => email.toLowerCase()),
 };
 
 if (!config.mongoUri) {

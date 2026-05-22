@@ -11,9 +11,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { isAdminEmail } from "@/lib/admin";
 
 const AuthButton = () => {
   const { user, logout } = useAuth();
+  const isAdmin = isAdminEmail(user?.email);
 
   if (!user) {
     return (
@@ -65,6 +67,14 @@ const AuthButton = () => {
             <span>My Orders</span>
           </DropdownMenuItem>
         </Link>
+        {isAdmin && (
+          <Link to="/admin">
+            <DropdownMenuItem className="cursor-pointer">
+              <Package className="mr-2 h-4 w-4" />
+              <span>Admin Dashboard</span>
+            </DropdownMenuItem>
+          </Link>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600 focus:text-red-600">
           <LogOut className="mr-2 h-4 w-4" />

@@ -5,7 +5,33 @@ const orderItemSchema = new mongoose.Schema({
   quantity: { type: Number, required: true },
   price: { type: Number, required: true },
   image: { type: String },
+  itemType: { type: String, enum: ["supermarket", "recipe"], required: true },
+  referenceId: { type: String },
 });
+
+const deliveryAddressSchema = new mongoose.Schema(
+  {
+    label: { type: String },
+    name: { type: String, required: true },
+    phone: { type: String, required: true },
+    line1: { type: String, required: true },
+    line2: { type: String },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    postalCode: { type: String, required: true },
+    country: { type: String, required: true },
+  },
+  { _id: false }
+);
+
+const couponSnapshotSchema = new mongoose.Schema(
+  {
+    code: { type: String },
+    type: { type: String, enum: ["percent", "flat"] },
+    amount: { type: Number },
+  },
+  { _id: false }
+);
 
 const orderSchema = new mongoose.Schema(
   {
@@ -18,8 +44,9 @@ const orderSchema = new mongoose.Schema(
     discount: { type: Number, default: 0 },
     total: { type: Number, required: true },
     paymentMethod: { type: String, default: "Online Payment" },
-    deliveryAddress: { type: String },
+    deliveryAddress: { type: deliveryAddressSchema, required: true },
     estimatedDelivery: { type: String },
+    coupon: { type: couponSnapshotSchema },
     status: {
       type: String,
       enum: ["confirmed", "preparing", "shipped", "delivered", "cancelled"],

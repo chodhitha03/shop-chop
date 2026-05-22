@@ -15,6 +15,18 @@ interface OrderItem {
   image?: string;
 }
 
+interface AddressSnapshot {
+  label?: string;
+  name: string;
+  phone: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+}
+
 interface Order {
   _id: string;
   orderId: string;
@@ -25,11 +37,18 @@ interface Order {
   discount: number;
   total: number;
   paymentMethod: string;
-  deliveryAddress: string;
+  deliveryAddress: AddressSnapshot | string;
   estimatedDelivery: string;
   status: string;
   createdAt: string;
 }
+
+const formatAddress = (address?: AddressSnapshot | string) => {
+  if (!address) return '';
+  if (typeof address === 'string') return address;
+  const line2 = address.line2 ? `, ${address.line2}` : '';
+  return `${address.line1}${line2}, ${address.city}, ${address.state} ${address.postalCode}, ${address.country}`;
+};
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   confirmed:  { bg: 'bg-blue-100',    text: 'text-blue-700',    label: 'Confirmed' },
@@ -161,6 +180,7 @@ const MyOrders = () => {
               const date = new Date(order.createdAt).toLocaleDateString('en-IN', {
                 year: 'numeric', month: 'long', day: 'numeric',
               });
+              const addressText = formatAddress(order.deliveryAddress);
 
               return (
                 <StaggerItem key={order._id}>
@@ -221,8 +241,8 @@ const MyOrders = () => {
                                   <div>
                                     <p className="text-sm font-semibold text-foreground">Estimated Delivery</p>
                                     <p className="text-sm text-primary font-medium">{order.estimatedDelivery}</p>
-                                    {order.deliveryAddress && (
-                                      <p className="text-xs text-muted-foreground mt-1">📍 {order.deliveryAddress}</p>
+                                    {addressText && (
+                                      <p className="text-xs text-muted-foreground mt-1">Address: {addressText}</p>
                                     )}
                                   </div>
                                 </div>

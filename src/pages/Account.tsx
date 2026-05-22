@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,13 +7,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
-  User, Mail, Lock, Package, LogOut, ChevronRight,
-  Shield, Bell, Heart, Settings, Edit3, Check, X
+  User, Mail, Lock, Package, LogOut,
+  Shield, Heart, Settings, Edit3, Check, X, MapPin, Plus, Trash2
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { PageTransition, FadeUp, StaggerChildren, StaggerItem, motion, HoverLift } from '@/components/motion';
+import { AddressForm, type AddressInput } from '@/components/AddressForm';
+
+interface Address {
+  _id: string;
+  label?: string;
+  name: string;
+  phone: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  isDefault?: boolean;
+}
 
 export default function Account() {
   const { user, logout, checkAuth } = useAuth();
@@ -24,6 +39,112 @@ export default function Account() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [saving, setSaving] = useState(false);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [addressLoading, setAddressLoading] = useState(false);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      fetchAddresses();
+    }
+  }, [user]);
+
+  const fetchAddresses = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(api('/api/users/addresses'), {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAddresses(data);
+      }
+    } catch (error) {
+      console.error('Fetch addresses error:', error);
+    }
+  };
+
+  const handleSaveAddress = async (payload: AddressInput) => {
+    setAddressLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const url = editingAddress
+        ? api(`/api/users/addresses/${editingAddress._id}`)
+        : api('/api/users/addresses');
+
+      const res = await fetch(url, {
+        method: editingAddress ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setAddresses(data);
+        setShowAddressForm(false);
+        setEditingAddress(null);
+        toast.success(editingAddress ? 'Address updated' : 'Address added');
+      } else {
+        toast.error(data.message || 'Failed to save address');
+      }
+    } catch (error) {
+      console.error('Save address error:', error);
+      toast.error('Failed to save address');
+    } finally {
+      setAddressLoading(false);
+    }
+  };
+
+  const handleDeleteAddress = async (addressId: string) => {
+    if (!window.confirm('Delete this address?')) return;
+    setAddressLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(api(`/api/users/addresses/${addressId}`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAddresses(data);
+        toast.success('Address removed');
+      } else {
+        toast.error(data.message || 'Failed to delete address');
+      }
+    } catch (error) {
+      console.error('Delete address error:', error);
+      toast.error('Failed to delete address');
+    } finally {
+      setAddressLoading(false);
+    }
+  };
+
+  const handleSetDefault = async (addressId: string) => {
+    setAddressLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(api(`/api/users/addresses/${addressId}/default`), {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAddresses(data);
+        toast.success('Default address updated');
+      } else {
+        toast.error(data.message || 'Failed to update default address');
+      }
+    } catch (error) {
+      console.error('Default address error:', error);
+      toast.error('Failed to update default address');
+    } finally {
+      setAddressLoading(false);
+    }
+  };
 
   const handleUpdateName = async () => {
     if (!newName.trim()) return;
@@ -287,6 +408,123 @@ export default function Account() {
                     </Button>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </FadeUp>
+
+          {/* Addresses */}
+          <FadeUp delay={0.3}>
+            <Card className="bg-card/90 mb-4">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  Saved Addresses
+                </CardTitle>
+                <CardDescription>Manage delivery addresses for checkout</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-sm text-muted-foreground">
+                    {addresses.length} saved address{addresses.length !== 1 ? 'es' : ''}
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setEditingAddress(null);
+                      setShowAddressForm((prev) => !prev);
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    {showAddressForm ? 'Close form' : 'Add address'}
+                  </Button>
+                </div>
+
+                {showAddressForm && (
+                  <AddressForm
+                    submitLabel={editingAddress ? 'Update address' : 'Save address'}
+                    loading={addressLoading}
+                    initial={editingAddress || undefined}
+                    onSubmit={handleSaveAddress}
+                    onCancel={() => {
+                      setShowAddressForm(false);
+                      setEditingAddress(null);
+                    }}
+                  />
+                )}
+
+                <div className="space-y-3">
+                  {addresses.length === 0 && (
+                    <div className="rounded-xl border border-dashed border-border/60 p-4 text-sm text-muted-foreground">
+                      Add your first delivery address to start checkout.
+                    </div>
+                  )}
+
+                  {addresses.map((address) => (
+                    <div
+                      key={address._id}
+                      className="rounded-xl border border-border/60 bg-background/60 p-4"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-foreground">
+                              {address.label || 'Delivery address'}
+                            </p>
+                            {address.isDefault && (
+                              <Badge variant="outline" className="text-xs">Default</Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {address.name} · {address.phone}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {address.line1}
+                            {address.line2 ? `, ${address.line2}` : ''}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {address.city}, {address.state} {address.postalCode}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {address.country}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setEditingAddress(address);
+                              setShowAddressForm(true);
+                            }}
+                          >
+                            <Edit3 className="h-3.5 w-3.5 mr-1" />
+                            Edit
+                          </Button>
+                          {!address.isDefault && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleSetDefault(address._id)}
+                              disabled={addressLoading}
+                            >
+                              Set default
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDeleteAddress(address._id)}
+                            disabled={addressLoading}
+                          >
+                            <Trash2 className="h-3.5 w-3.5 mr-1" />
+                            Remove
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </FadeUp>
