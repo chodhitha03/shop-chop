@@ -1,0 +1,158 @@
+export interface Recipe {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+  category: 'breakfast' | 'lunch' | 'dinner' | 'desserts';
+  cookingTime: number;
+  servings: number;
+  ingredients: {
+    name: string;
+    quantity: string;
+    price: number;
+  }[];
+  instructions: string[];
+}
+
+export const recipes: Recipe[] = [
+  // Breakfast
+  {
+    id: 'fluffy-pancakes',
+    name: 'Fluffy Pancakes',
+    description: 'Light and airy pancakes perfect for a weekend breakfast',
+    image: '/recipes/fluffy-pancakes.svg',
+    category: 'breakfast',
+    cookingTime: 20,
+    servings: 4,
+    ingredients: [
+      { name: 'All-purpose flour', quantity: '2 cups', price: 290 },
+      { name: 'Baking powder', quantity: '2 tsp', price: 100 },
+      { name: 'Sugar', quantity: '2 tbsp', price: 165 },
+      { name: 'Salt', quantity: '1/2 tsp', price: 40 },
+      { name: 'Milk', quantity: '1 3/4 cups', price: 330 },
+      { name: 'Eggs', quantity: '2 large', price: 250 },
+      { name: 'Butter', quantity: '4 tbsp', price: 205 },
+    ],
+    instructions: [
+      'Mix dry ingredients in a large bowl',
+      'Whisk together wet ingredients in another bowl',
+      'Combine wet and dry ingredients until just mixed',
+      'Heat griddle and cook pancakes until bubbles form',
+      'Flip and cook until golden brown',
+      'Serve hot with syrup and butter'
+    ]
+  },
+  {
+    id: 'avocado-toast',
+    name: 'Avocado Toast',
+    description: 'Creamy avocado on toasted sourdough with a poached egg',
+    image: '/recipes/avocado-toast.svg',
+    category: 'breakfast',
+    cookingTime: 10,
+    servings: 2,
+    ingredients: [
+      { name: 'Sourdough bread', quantity: '4 slices', price: 330 },
+      { name: 'Avocado', quantity: '2 large', price: 495 },
+      { name: 'Eggs', quantity: '2 large', price: 250 },
+      { name: 'Lemon juice', quantity: '1 tbsp', price: 82 },
+      { name: 'Salt', quantity: 'to taste', price: 40 },
+      { name: 'Black pepper', quantity: 'to taste', price: 62 },
+    ],
+    instructions: [
+      'Toast the sourdough bread until golden',
+      'Mash avocados with lemon juice, salt, and pepper',
+      'Poach eggs in simmering water for 3-4 minutes',
+      'Spread avocado mixture on toast',
+      'Top with poached eggs',
+      'Season with additional salt and pepper'
+    ]
+  },
+  // Lunch
+  {
+    id: 'chicken-caesar-salad',
+    name: 'Chicken Caesar Salad',
+    description: 'Crispy romaine lettuce with grilled chicken and homemade dressing',
+    image: '/recipes/chicken-caesar-salad.svg',
+    category: 'lunch',
+    cookingTime: 25,
+    servings: 2,
+    ingredients: [
+      { name: 'Chicken breast', quantity: '2 pieces', price: 660 },
+      { name: 'Romaine lettuce', quantity: '2 heads', price: 370 },
+      { name: 'Parmesan cheese', quantity: '1/2 cup', price: 415 },
+      { name: 'Croutons', quantity: '1 cup', price: 250 },
+      { name: 'Caesar dressing', quantity: '1/4 cup', price: 205 },
+      { name: 'Olive oil', quantity: '2 tbsp', price: 125 },
+    ],
+    instructions: [
+      'Season and grill chicken breast until cooked through',
+      'Chop romaine lettuce into bite-sized pieces',
+      'Slice grilled chicken',
+      'Toss lettuce with Caesar dressing',
+      'Add chicken, croutons, and Parmesan',
+      'Serve immediately'
+    ]
+  },
+  // Dinner
+  {
+    id: 'spaghetti-bolognese',
+    name: 'Spaghetti Bolognese',
+    description: 'Classic Italian pasta with rich meat sauce',
+    image: '/recipes/spaghetti-bolognese.svg',
+    category: 'dinner',
+    cookingTime: 45,
+    servings: 4,
+    ingredients: [
+      { name: 'Spaghetti', quantity: '1 lb', price: 250 },
+      { name: 'Ground beef', quantity: '1 lb', price: 660 },
+      { name: 'Onion', quantity: '1 large', price: 125 },
+      { name: 'Garlic', quantity: '3 cloves', price: 62 },
+      { name: 'Tomato sauce', quantity: '2 cups', price: 290 },
+      { name: 'Red wine', quantity: '1/2 cup', price: 330 },
+      { name: 'Parmesan cheese', quantity: '1/2 cup', price: 415 },
+    ],
+    instructions: [
+      'Cook spaghetti according to package directions',
+      'Brown ground beef in a large pan',
+      'Add diced onion and garlic, cook until soft',
+      'Add tomato sauce and red wine',
+      'Simmer for 30 minutes',
+      'Serve over spaghetti with Parmesan'
+    ]
+  },
+  // Desserts
+  {
+    id: 'chocolate-brownies',
+    name: 'Chocolate Brownies',
+    description: 'Rich and fudgy brownies with chocolate chips',
+    image: '/recipes/chocolate-brownies.svg',
+    category: 'desserts',
+    cookingTime: 35,
+    servings: 9,
+    ingredients: [
+      { name: 'Dark chocolate', quantity: '8 oz', price: 495 },
+      { name: 'Butter', quantity: '1/2 cup', price: 250 },
+      { name: 'Sugar', quantity: '1 cup', price: 165 },
+      { name: 'Eggs', quantity: '3 large', price: 370 },
+      { name: 'All-purpose flour', quantity: '3/4 cup', price: 165 },
+      { name: 'Cocoa powder', quantity: '1/4 cup', price: 205 },
+      { name: 'Chocolate chips', quantity: '1/2 cup', price: 330 },
+    ],
+    instructions: [
+      'Preheat oven to 350°F (175°C)',
+      'Melt chocolate and butter together',
+      'Beat in sugar and eggs',
+      'Fold in flour and cocoa powder',
+      'Add chocolate chips',
+      'Bake for 25-30 minutes until set'
+    ]
+  }
+];
+
+export const getRecipesByCategory = (category: string) => {
+  return recipes.filter(recipe => recipe.category === category);
+};
+
+export const getRecipeById = (id: string) => {
+  return recipes.find(recipe => recipe.id === id);
+};

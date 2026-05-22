@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Shop Chop favicon">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffb36b" />
+      <stop offset="1" stop-color="#ffd86f" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)" />
+  <path d="M20 24h24l-2 28H22z" fill="#2ec4b6" />
+  <path d="M24 24c0-6 4-10 8-10s8 4 8 10" fill="none" stroke="#0e5563" stroke-width="4" stroke-linecap="round" />
+  <path d="M30 38c5-4 10-3 12 2-5 2-9 1-12-2z" fill="#ffffff" />
+</svg>

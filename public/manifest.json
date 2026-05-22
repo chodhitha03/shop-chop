@@ -1,0 +1,17 @@
+{
+  "name": "Shop & Chop — Culinary Studio",
+  "short_name": "Shop & Chop",
+  "description": "Premium culinary platform for recipes and grocery shopping",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF5EF",
+  "theme_color": "#C2491D",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}

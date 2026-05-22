@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -52,6 +53,13 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				brand: {
+					ink: 'hsl(var(--brand-ink))',
+					sand: 'hsl(var(--brand-sand))',
+					ember: 'hsl(var(--brand-ember))',
+					sage: 'hsl(var(--brand-sage))',
+					ice: 'hsl(var(--brand-ice))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -62,6 +70,10 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				}
+			},
+			fontFamily: {
+				sans: ['"Instrument Sans"', 'ui-sans-serif', 'system-ui'],
+				display: ['"Space Grotesk"', 'ui-sans-serif', 'system-ui']
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +96,32 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-up': {
+					from: { opacity: '0', transform: 'translateY(12px)' },
+					to: { opacity: '1', transform: 'translateY(0)' }
+				},
+				'float-slow': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-8px)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-up': 'fade-up 0.6s ease-out',
+				'float-slow': 'float-slow 6s ease-in-out infinite'
+			},
+			backgroundImage: {
+				hero: 'var(--gradient-hero)',
+				panel: 'var(--gradient-panel)',
+				accent: 'var(--gradient-accent)',
+				muted: 'var(--gradient-muted)'
+			},
+			boxShadow: {
+				soft: 'var(--shadow-soft)',
+				lift: 'var(--shadow-lift)',
+				float: 'var(--shadow-float)'
 			}
 		}
 	},

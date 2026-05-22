@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Fresh meat">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F7E1E1" />
+      <stop offset="100%" stop-color="#F0B6B6" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" rx="48" fill="url(#bg)" />
+  <ellipse cx="600" cy="640" rx="300" ry="110" fill="#FDF3F3" />
+  <path d="M420 520c60-90 260-120 360-40 70 55 90 170-40 220-150 60-300-40-320-180z" fill="#C75B5B" />
+  <path d="M520 540c50-50 170-60 220-10 40 40 20 110-60 130-90 20-170-40-160-120z" fill="#E08B8B" />
+  <circle cx="570" cy="585" r="26" fill="#F6D6D6" />
+</svg>

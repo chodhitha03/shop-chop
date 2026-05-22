@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Fresh vegetables">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E6F4EA" />
+      <stop offset="100%" stop-color="#CBE7D2" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" rx="48" fill="url(#bg)" />
+  <ellipse cx="600" cy="680" rx="320" ry="110" fill="#F7FBF6" />
+  <path d="M420 620c40-120 140-180 180-130 50 60-20 170-90 210" fill="#5FAF75" />
+  <path d="M720 620c-40-120-140-180-180-130-50 60 20 170 90 210" fill="#6EC28B" />
+  <path d="M500 650c30-70 80-90 110-70 40 30 30 90-10 140" fill="#7DD096" />
+  <circle cx="630" cy="520" r="26" fill="#F56B5D" />
+  <circle cx="675" cy="560" r="20" fill="#F08A5B" />
+</svg>
